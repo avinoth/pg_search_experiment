@@ -5,7 +5,7 @@ class Post < ActiveRecord::Base
 
   def self.text_search(query)
     if query.present?
-      match_word = Word.where("word % ?", query).order("similarity(word, '#{query}')")
+      match_word = Word.where("word % ?", query).order("similarity(word, '#{query}') DESC")
       terms = match_word.map{|t| "#{t.word}:*" }.join(' & ')
       Post.where("tsv_body @@ to_tsquery('simple', ?)", terms)
     else
