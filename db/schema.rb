@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150106074956) do
+ActiveRecord::Schema.define(version: 20150106110820) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,29 @@ ActiveRecord::Schema.define(version: 20150106074956) do
     t.integer  "score"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.tsvector "tsv_body"
   end
+
+  add_index "posts", ["tsv_body"], name: "index_posts_on_tsv_body", using: :gin
+
+  create_table "words", force: true do |t|
+    t.string "word"
+  end
+
+  # no candidate create_trigger statement could be found, creating an adapter-specific one
+  execute(<<-TRIGGERSQL)
+CREATE OR REPLACE FUNCTION public.posts_before_insert_update_row_tr()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    new.tsv_body := to_tsvector('pg_catalog.english', coalesce(new.name,''));
+    RETURN NEW;
+END;
+$function$
+  TRIGGERSQL
+
+  # no candidate create_trigger statement could be found, creating an adapter-specific one
+  execute("CREATE TRIGGER posts_before_insert_update_row_tr BEFORE INSERT OR UPDATE ON posts FOR EACH ROW EXECUTE PROCEDURE posts_before_insert_update_row_tr()")
 
 end
