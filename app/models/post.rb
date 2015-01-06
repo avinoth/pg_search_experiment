@@ -1,7 +1,11 @@
 class Post < ActiveRecord::Base
+  include PgSearch
+
+  pg_search_scope :search, against: [:name]
+
   def self.text_search(query)
     if query.present?
-      where("name ilike :q", q: "%#{query}%")
+      search(query)
     else
       all
     end
