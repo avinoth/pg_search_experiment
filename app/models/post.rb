@@ -1,7 +1,8 @@
 class Post < ActiveRecord::Base
   include PgSearch
 
-  pg_search_scope :search, against: [:name], using: [:tsearch, :trigram]
+  pg_search_scope :search, against: [:name], using: [:tsearch, :trigram],
+    ranked_by: ":trigram"
 
 
   def self.text_search(query)
