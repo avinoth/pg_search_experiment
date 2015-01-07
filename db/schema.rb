@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150106110820) do
+ActiveRecord::Schema.define(version: 20150107064937) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,11 +25,14 @@ ActiveRecord::Schema.define(version: 20150106110820) do
     t.tsvector "tsv_body"
   end
 
+  add_index "posts", ["name"], name: "name_similarity_idx", using: :gist
   add_index "posts", ["tsv_body"], name: "index_posts_on_tsv_body", using: :gin
 
   create_table "words", force: true do |t|
     t.string "word"
   end
+
+  add_index "words", ["word"], name: "words_idx", using: :gin
 
   # no candidate create_trigger statement could be found, creating an adapter-specific one
   execute(<<-TRIGGERSQL)
