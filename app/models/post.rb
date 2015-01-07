@@ -1,7 +1,7 @@
 class Post < ActiveRecord::Base
   def self.text_search(query)
     if query.present?
-      where("name ilike :q", q: "%#{query}%")
+      where("to_tsvector('english', name) @@ plainto_tsquery('english', :q)", q: "%#{query}%")
     else
       all
     end
